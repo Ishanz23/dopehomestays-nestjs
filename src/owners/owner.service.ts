@@ -39,11 +39,11 @@ export class OwnerService {
 @InputType()
 export class CreateOwnerInput {
   @Field(() => String) firstName: string;
-  @Field(() => String) lastName: string;
+  @Field(() => String, { nullable: true }) lastName: string;
   @Field(() => GraphQLISODateTime, { nullable: true }) dob: Date;
   @Field(() => String) sex: string;
   @Field(() => String) mobile: string;
-  @Field(() => String) email: string;
+  @Field(() => String, { nullable: true }) email: string;
   @Field(() => [String], { nullable: 'itemsAndList' })
   homestays: MongooseSchema.Types.ObjectId[];
 }
@@ -63,7 +63,7 @@ export class ListOwnerInput {
 
 @InputType()
 export class UpdateOwnerInput {
-  @Field(() => String, { nullable: true }) _id: MongooseSchema.Types.ObjectId;
+  @Field(() => String) _id: MongooseSchema.Types.ObjectId;
   @Field(() => String, { nullable: true }) firstName?: string;
   @Field(() => String, { nullable: true }) lastName?: string;
   @Field(() => GraphQLISODateTime, { nullable: true }) dob?: Date;

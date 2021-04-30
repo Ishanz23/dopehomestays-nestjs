@@ -4,31 +4,63 @@ import { Document, Schema as MongooseSchema } from 'mongoose';
 import { Owner } from '../../owners/schema/owner.schema';
 import { Promotion } from './promotion.schema';
 
-@InputType()
+// @InputType()
 @ObjectType()
 @Schema()
 export class RoomPlan {
-  @Field(() => String) @Prop() name: string;
-  @Field(() => Float) @Prop() rate: number;
-  @Field(() => String) @Prop({ default: 'INR' }) currency: string;
-  @Field(() => Float) @Prop({ default: 0 }) discount: number;
-  @Field(() => Boolean) @Prop({ default: true }) isDiscountPercentage: boolean;
+  @Field(() => String) @Prop({ required: true }) id: string;
+  @Field(() => String) @Prop({ required: true }) name: string;
+  @Field(() => Float) @Prop({ required: true }) rate: number;
+  @Field(() => String, { nullable: true })
+  @Prop({ default: 'INR' })
+  currency: string;
+  @Field(() => Float, { nullable: true })
+  @Prop({ default: 0 })
+  discount: number;
+  @Field(() => Boolean, { nullable: true })
+  @Prop({ default: true })
+  isDiscountPercentage: boolean;
+}
+@InputType()
+export class RoomPlanInput {
+  @Field(() => String) id: string;
+  @Field(() => String) name: string;
+  @Field(() => Float) rate: number;
+  @Field(() => String, { nullable: true }) currency: string;
+  @Field(() => Float, { nullable: true }) discount: number;
+  @Field(() => Boolean, { nullable: true }) isDiscountPercentage: boolean;
 }
 
-@InputType()
+export const RoomPlanSchema = SchemaFactory.createForClass(RoomPlan);
 @ObjectType()
 @Schema()
 export class Room {
-  @Field(() => String) @Prop({ required: true }) roomType: string;
-  @Field(() => Int) @Prop({ default: 1 }) count: number;
-  @Field(() => Int) @Prop({ default: 2 }) numberOfHeads: number;
-  @Field(() => [String]) @Prop([String]) amenities: string[];
-  // @Field(() => [RoomPlan])
-  // @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: RoomPlan.name }] })
-  // plans: RoomPlan[];
+  @Field(() => String) @Prop({ required: true }) id: string;
+  @Field(() => String) @Prop() name: string;
+  @Field(() => String) @Prop() description: string;
+  @Field(() => Int, { nullable: true }) @Prop({ default: 1 }) count: number;
+  @Field(() => Int, { nullable: true }) @Prop({ default: 2 }) noOfHeads: number;
+  @Field(() => [String], { nullable: 'itemsAndList' })
+  @Prop({ type: [String], default: [] })
+  amenities: string[];
+  @Field(() => [RoomPlan])
+  @Prop({ type: [RoomPlanSchema] })
+  plans: RoomPlan[];
+}
+@InputType()
+export class RoomInput {
+  @Field(() => String) id: string;
+  @Field(() => String, { nullable: true }) name: string;
+  @Field(() => String, { nullable: true }) description: string;
+  @Field(() => Int, { nullable: true }) count: number;
+  @Field(() => Int, { nullable: true }) noOfHeads: number;
+  @Field(() => [String], { nullable: 'itemsAndList' }) amenities: string[];
+  @Field(() => [RoomPlanInput])
+  plans: RoomPlanInput[];
 }
 
-@InputType()
+export const RoomSchema = SchemaFactory.createForClass(Room);
+
 @ObjectType()
 @Schema()
 export class CancellationPolicy {
@@ -36,14 +68,30 @@ export class CancellationPolicy {
   @Field(() => Float) @Prop({ default: 5 }) charge: number;
   @Field(() => Boolean) @Prop({ default: true }) isPercentage: boolean;
 }
-
 @InputType()
+export class CancellationPolicyInput {
+  @Field(() => Int, { nullable: true }) daysAgo: number;
+  @Field(() => Float, { nullable: true }) charge: number;
+  @Field(() => Boolean, { nullable: true }) isPercentage: boolean;
+}
+
+export const CancellationPolicySchema = SchemaFactory.createForClass(
+  CancellationPolicy,
+);
+
 @ObjectType()
 @Schema()
 export class Gallery {
   @Field(() => String) @Prop() name: string;
   @Field(() => String) @Prop() path: string;
 }
+@InputType()
+export class GalleryInput {
+  @Field(() => String) name: string;
+  @Field(() => String) path: string;
+}
+
+export const GallerySchema = SchemaFactory.createForClass(Gallery);
 
 @ObjectType()
 @Schema()
@@ -52,57 +100,59 @@ export class Homestay {
 
   @Field(() => String) @Prop({ required: true }) name: string;
 
-  @Field(() => String) @Prop() category: string;
+  @Field(() => String, { nullable: true })
+  @Prop({ default: 'Economy' })
+  category: string;
 
-  @Field(() => String) @Prop() description: string;
+  @Field(() => String, { nullable: true }) @Prop() description: string;
 
-  @Field(() => String) @Prop() address: string;
+  @Field(() => String, { nullable: true }) @Prop() address: string;
+
+  @Field(() => String) @Prop() place: string;
 
   @Field(() => String) @Prop({ required: true }) state: string;
 
-  @Field(() => String) @Prop({ required: true }) country: string;
+  @Field(() => String, { nullable: true })
+  @Prop({ default: 'India' })
+  country: string;
 
   @Field(() => String) @Prop({ required: true }) mobile: string;
 
-  @Field(() => String) @Prop({ default: '11:00' }) checkinTime: string;
+  @Field(() => String, { nullable: true })
+  @Prop({ default: '11:00' })
+  checkinTime: string;
 
-  @Field(() => String) @Prop({ default: '10.00' }) checkoutTime: string;
+  @Field(() => String, { nullable: true })
+  @Prop({ default: '10.00' })
+  checkoutTime: string;
 
-  @Field(() => [String])
+  @Field(() => [String], { nullable: 'itemsAndList' })
   @Prop({ type: [String], default: [] })
   locationTags: string[];
 
-  @Field(() => [String]) @Prop({ type: [String], default: [] }) tags: string[];
+  @Field(() => [String], { nullable: 'itemsAndList' })
+  @Prop({ type: [String], default: [] })
+  tags: string[];
 
-  @Field(() => Boolean)
+  @Field(() => Boolean, { nullable: true })
   @Prop({ default: true })
   isActive: boolean;
 
-  // @Field(() => [CancellationPolicy])
-  // @Prop({
-  //   type: [
-  //     {
-  //       type: MongooseSchema.Types.ObjectId,
-  //       ref: CancellationPolicy.name,
-  //     },
-  //   ],
-  //   default: [],
-  // })
-  // cancellationPolicies: CancellationPolicy[];
+  @Field(() => [CancellationPolicy], { nullable: 'itemsAndList' })
+  @Prop({
+    type: [CancellationPolicySchema],
+    default: [],
+  })
+  cancellationPolicies: CancellationPolicy[];
 
-  // @Field(() => [Gallery])
-  // @Prop({
-  //   type: [
-  //     {
-  //       type: MongooseSchema.Types.ObjectId,
-  //       ref: Gallery.name,
-  //     },
-  //   ],
-  //   default: [],
-  // })
-  // gallery: Gallery[];
+  @Field(() => [Gallery], { nullable: 'itemsAndList' })
+  @Prop({
+    type: [GallerySchema],
+    default: [],
+  })
+  gallery: Gallery[];
 
-  @Field(() => [String])
+  @Field(() => [String], { nullable: 'itemsAndList' })
   @Prop({
     type: [MongooseSchema.Types.ObjectId],
     ref: Owner.name,
@@ -110,7 +160,7 @@ export class Homestay {
   })
   owners: MongooseSchema.Types.ObjectId[];
 
-  @Field(() => [String])
+  @Field(() => [String], { nullable: 'itemsAndList' })
   @Prop({
     type: [MongooseSchema.Types.ObjectId],
     ref: Promotion.name,
@@ -118,9 +168,9 @@ export class Homestay {
   })
   promotions: MongooseSchema.Types.ObjectId[];
 
-  // @Field(() => [Room])
-  // @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: Room.name }] })
-  // rooms: Room[];
+  @Field(() => [Room])
+  @Prop({ type: [RoomSchema], default: [] })
+  rooms: Room[];
 }
 
 export type HomeStayDocument = Homestay & Document;

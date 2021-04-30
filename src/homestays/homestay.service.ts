@@ -3,10 +3,13 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Schema as MongooseSchema } from 'mongoose';
 import {
   CancellationPolicy,
+  CancellationPolicyInput,
   Gallery,
+  GalleryInput,
   Homestay,
   HomeStayDocument,
   Room,
+  RoomInput,
 } from './schema/homestay.schema';
 import { Field, InputType } from '@nestjs/graphql';
 
@@ -30,7 +33,9 @@ export class HomestayService {
   }
 
   update(payload: UpdateHomestayInput) {
-    this.homestayModel.updateOne(payload._id, payload, { new: true }).exec();
+    return this.homestayModel
+      .findByIdAndUpdate(payload._id, payload, { new: true })
+      .exec();
   }
 
   delete(_id: MongooseSchema.Types.ObjectId) {
@@ -42,38 +47,42 @@ export class HomestayService {
 export class CreateHomestayInput {
   @Field(() => String) name: string;
 
-  @Field(() => String) category: string;
+  @Field(() => String, { nullable: true }) category: string;
 
-  @Field(() => String) description: string;
+  @Field(() => String, { nullable: true }) description: string;
 
   @Field(() => String) address: string;
 
-  @Field(() => String) state: string;
+  @Field(() => String) place: string;
 
-  @Field(() => String) country: string;
+  @Field(() => String, { nullable: true }) state: string;
+
+  @Field(() => String, { nullable: true }) country: string;
 
   @Field(() => String) mobile: string;
 
-  @Field(() => String) checkinTime: string;
+  @Field(() => String, { nullable: true }) checkinTime: string;
 
-  @Field(() => String) checkoutTime: string;
+  @Field(() => String, { nullable: true }) checkoutTime: string;
 
-  @Field(() => [String]) locationTags: string[];
+  @Field(() => [String], { nullable: 'itemsAndList' }) locationTags: string[];
 
-  @Field(() => [String]) tags: string[];
+  @Field(() => [String], { nullable: 'itemsAndList' }) tags: string[];
 
-  @Field(() => Boolean) isActive: boolean;
+  @Field(() => Boolean, { nullable: true }) isActive: boolean;
 
-  @Field(() => [Gallery]) gallery?: Gallery[];
+  @Field(() => [GalleryInput], { nullable: 'itemsAndList' })
+  gallery?: GalleryInput[];
 
-  @Field(() => [CancellationPolicy])
-  cancellationPolicies?: CancellationPolicy[];
+  @Field(() => [CancellationPolicyInput], { nullable: 'itemsAndList' })
+  cancellationPolicies?: CancellationPolicyInput[];
 
-  @Field(() => [Room]) rooms: Room[];
+  @Field(() => [RoomInput]) rooms: RoomInput[];
 
-  @Field(() => [String]) owners: MongooseSchema.Types.ObjectId[];
+  @Field(() => [String], { nullable: 'itemsAndList' })
+  owners: MongooseSchema.Types.ObjectId[];
 
-  @Field(() => [String], { nullable: true })
+  @Field(() => [String], { nullable: 'itemsAndList' })
   promotions?: MongooseSchema.Types.ObjectId[];
 }
 
@@ -89,6 +98,8 @@ export class ListHomestaysInput {
 
   @Field(() => String, { nullable: true }) address?: string;
 
+  @Field(() => String, { nullable: true }) place: string;
+
   @Field(() => String, { nullable: true }) state?: string;
 
   @Field(() => String, { nullable: true }) country?: string;
@@ -99,31 +110,31 @@ export class ListHomestaysInput {
 
   @Field(() => String, { nullable: true }) checkoutTime?: string;
 
-  @Field(() => [String], { nullable: true }) locationTags?: string[];
+  @Field(() => [String], { nullable: 'itemsAndList' }) locationTags?: string[];
 
-  @Field(() => [String], { nullable: true }) tags?: string[];
+  @Field(() => [String], { nullable: 'itemsAndList' }) tags?: string[];
 
   @Field(() => Boolean, { nullable: true }) isActive?: boolean;
 
-  @Field(() => [Gallery], { nullable: true })
-  gallery: Gallery[];
+  @Field(() => [GalleryInput], { nullable: 'itemsAndList' })
+  gallery: GalleryInput[];
 
-  @Field(() => [CancellationPolicy], { nullable: true })
-  cancellationPolicies: CancellationPolicy[];
+  @Field(() => [CancellationPolicyInput], { nullable: 'itemsAndList' })
+  cancellationPolicies: CancellationPolicyInput[];
 
-  @Field(() => [Room], { nullable: true })
-  rooms?: Room[];
+  @Field(() => [RoomInput], { nullable: 'itemsAndList' })
+  rooms?: RoomInput[];
 
-  @Field(() => [String], { nullable: true })
+  @Field(() => [String], { nullable: 'itemsAndList' })
   owners?: MongooseSchema.Types.ObjectId[];
 
-  @Field(() => [String], { nullable: true })
+  @Field(() => [String], { nullable: 'itemsAndList' })
   promotions?: MongooseSchema.Types.ObjectId[];
 }
 
 @InputType()
 export class UpdateHomestayInput {
-  @Field(() => String, { nullable: true }) _id?: MongooseSchema.Types.ObjectId;
+  @Field(() => String) _id?: MongooseSchema.Types.ObjectId;
 
   @Field(() => String, { nullable: true }) name?: string;
 
@@ -133,6 +144,8 @@ export class UpdateHomestayInput {
 
   @Field(() => String, { nullable: true }) address?: string;
 
+  @Field(() => String, { nullable: true }) place: string;
+
   @Field(() => String, { nullable: true }) state?: string;
 
   @Field(() => String, { nullable: true }) country?: string;
@@ -143,24 +156,24 @@ export class UpdateHomestayInput {
 
   @Field(() => String, { nullable: true }) checkoutTime?: string;
 
-  @Field(() => [String], { nullable: true }) locationTags?: string[];
+  @Field(() => [String], { nullable: 'itemsAndList' }) locationTags?: string[];
 
-  @Field(() => [String], { nullable: true }) tags?: string[];
+  @Field(() => [String], { nullable: 'itemsAndList' }) tags?: string[];
 
   @Field(() => Boolean, { nullable: true }) isActive?: boolean;
 
-  @Field(() => [Gallery], { nullable: true })
-  gallery?: Gallery[];
+  @Field(() => [GalleryInput], { nullable: 'itemsAndList' })
+  gallery?: GalleryInput[];
 
-  @Field(() => [CancellationPolicy], { nullable: true })
-  cancellationPolicies?: CancellationPolicy[];
+  @Field(() => [CancellationPolicyInput], { nullable: 'itemsAndList' })
+  cancellationPolicies?: CancellationPolicyInput[];
 
-  @Field(() => [Room], { nullable: true })
-  rooms?: Room[];
+  @Field(() => [RoomInput], { nullable: 'itemsAndList' })
+  rooms?: RoomInput[];
 
-  @Field(() => [String], { nullable: true })
+  @Field(() => [String], { nullable: 'itemsAndList' })
   owners?: MongooseSchema.Types.ObjectId[];
 
-  @Field(() => [String], { nullable: true })
+  @Field(() => [String], { nullable: 'itemsAndList' })
   promotions?: MongooseSchema.Types.ObjectId[];
 }
