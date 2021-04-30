@@ -1,18 +1,26 @@
 import { Injectable } from '@nestjs/common';
-import { Field, GraphQLISODateTime, InputType } from '@nestjs/graphql';
+import { Field, InputType, OmitType, PartialType } from '@nestjs/graphql';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Schema as MongooseSchema } from 'mongoose';
+import {
+  Homestay,
+  HomeStayDocument,
+} from 'src/homestays/schema/homestay.schema';
 import { Owner, OwnerDocument } from './schema/owner.schema';
 
 @Injectable()
 export class OwnerService {
   constructor(
     @InjectModel(Owner.name) private ownerModel: Model<OwnerDocument>,
+    @InjectModel(Homestay.name) private homestayModel: Model<HomeStayDocument>,
   ) {}
 
-  create(payload: CreateOwnerInput) {
-    const owner = new this.ownerModel(payload);
-    return owner.save();
+  async create(payload: CreateOwnerInput) {
+    const savedOwner = await this.ownerModel.create(payload);
+
+    this.addOwnerToHomestay(payload.homestays, savedOwner._id);
+
+    return savedOwner;
   }
 
   getById(_id: MongooseSchema.Types.ObjectId) {
@@ -23,53 +31,51 @@ export class OwnerService {
     return this.ownerModel.find({ ...filters }).exec();
   }
 
-  update(payload: UpdateOwnerInput) {
-    return this.ownerModel
+  async update(payload: UpdateOwnerInput) {
+    const updatedOwner = await this.ownerModel
       .findByIdAndUpdate(payload._id, payload, {
         new: true,
       })
       .exec();
+
+    this.addOwnerToHomestay(payload.homestays, updatedOwner._id);
+
+    return updatedOwner;
   }
 
   delete(_id: MongooseSchema.Types.ObjectId) {
     return this.ownerModel.findByIdAndDelete(_id).exec();
   }
+
+  private addOwnerToHomestay(
+    homestays: MongooseSchema.Types.ObjectId[],
+    ownerId: MongooseSchema.Types.ObjectId,
+  ) {
+    if (homestays && homestays.length) {
+      homestays.forEach((homestayId) => {
+        console.log(homestayId);
+        const homestayCursor = this.homestayModel.findById(homestayId);
+        homestayCursor.exec().then((homestay) => {
+          console.log(ownerId);
+          let owners = [];
+          if (homestay) {
+            owners = [...homestay.owners, ownerId].filter((owner) => owner);
+          } else {
+            owners = [];
+          }
+          homestayCursor.updateOne({ _id: homestayId }, { owners }).exec();
+        });
+      });
+    }
+  }
 }
 
 @InputType()
-export class CreateOwnerInput {
-  @Field(() => String) firstName: string;
-  @Field(() => String, { nullable: true }) lastName: string;
-  @Field(() => GraphQLISODateTime, { nullable: true }) dob: Date;
-  @Field(() => String) sex: string;
-  @Field(() => String) mobile: string;
-  @Field(() => String, { nullable: true }) email: string;
-  @Field(() => [String], { nullable: 'itemsAndList' })
-  homestays: MongooseSchema.Types.ObjectId[];
-}
+export class CreateOwnerInput extends PartialType(Owner, InputType) {}
+@InputType()
+export class ListOwnerInput extends PartialType(CreateOwnerInput) {}
 
 @InputType()
-export class ListOwnerInput {
-  @Field(() => String, { nullable: true }) _id?: MongooseSchema.Types.ObjectId;
-  @Field(() => String, { nullable: true }) firstName?: string;
-  @Field(() => String, { nullable: true }) lastName?: string;
-  @Field(() => GraphQLISODateTime, { nullable: true }) dob?: Date;
-  @Field(() => String, { nullable: true }) sex?: string;
-  @Field(() => String, { nullable: true }) mobile?: string;
-  @Field(() => String, { nullable: true }) email?: string;
-  @Field(() => [String], { nullable: 'itemsAndList' })
-  homestays?: MongooseSchema.Types.ObjectId[];
-}
-
-@InputType()
-export class UpdateOwnerInput {
+export class UpdateOwnerInput extends OmitType(ListOwnerInput, ['_id']) {
   @Field(() => String) _id: MongooseSchema.Types.ObjectId;
-  @Field(() => String, { nullable: true }) firstName?: string;
-  @Field(() => String, { nullable: true }) lastName?: string;
-  @Field(() => GraphQLISODateTime, { nullable: true }) dob?: Date;
-  @Field(() => String, { nullable: true }) sex?: string;
-  @Field(() => String, { nullable: true }) mobile?: string;
-  @Field(() => String, { nullable: true }) email?: string;
-  @Field(() => [String], { nullable: 'itemsAndList' })
-  homestays?: MongooseSchema.Types.ObjectId[];
 }

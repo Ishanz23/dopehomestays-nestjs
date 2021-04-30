@@ -6,7 +6,7 @@ import {
   OwnerService,
   UpdateOwnerInput,
 } from './owner.service';
-import { Owner } from './schema/owner.schema';
+import { Owner, OwnerOutput } from './schema/owner.schema';
 
 @Resolver(() => Owner)
 export class OwnerResolver {

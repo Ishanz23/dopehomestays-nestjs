@@ -2,26 +2,28 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Schema as MongooseSchema } from 'mongoose';
 import {
-  CancellationPolicy,
   CancellationPolicyInput,
-  Gallery,
   GalleryInput,
   Homestay,
   HomeStayDocument,
-  Room,
   RoomInput,
 } from './schema/homestay.schema';
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, OmitType, PartialType } from '@nestjs/graphql';
+import { Owner, OwnerDocument } from 'src/owners/schema/owner.schema';
 
 @Injectable()
 export class HomestayService {
   constructor(
     @InjectModel(Homestay.name) private homestayModel: Model<HomeStayDocument>,
+    @InjectModel(Owner.name) private ownerModel: Model<OwnerDocument>,
   ) {}
 
-  create(payload: CreateHomestayInput) {
-    const createdHomestay = new this.homestayModel(payload);
-    return createdHomestay.save();
+  async create(payload: CreateHomestayInput) {
+    const savedHomestay = await this.homestayModel.create(payload);
+
+    this.addHomestayToOwner(payload.owners, savedHomestay._id);
+
+    return savedHomestay;
   }
 
   getById(_id: MongooseSchema.Types.ObjectId) {
@@ -32,45 +34,52 @@ export class HomestayService {
     return this.homestayModel.find({ ...filters }).exec();
   }
 
-  update(payload: UpdateHomestayInput) {
-    return this.homestayModel
-      .findByIdAndUpdate(payload._id, payload, { new: true })
-      .exec();
+  async update(payload: UpdateHomestayInput) {
+    const updatedHomestay = await this.homestayModel.findByIdAndUpdate(
+      payload._id,
+      payload,
+      { new: true },
+    );
+
+    this.addHomestayToOwner(payload.owners, updatedHomestay._id);
+
+    return updatedHomestay;
   }
 
   delete(_id: MongooseSchema.Types.ObjectId) {
     return this.homestayModel.findByIdAndDelete(_id).exec();
   }
+
+  private addHomestayToOwner(
+    owners: MongooseSchema.Types.ObjectId[],
+    homestayId: MongooseSchema.Types.ObjectId,
+  ) {
+    if (owners && owners.length) {
+      owners.forEach((ownerId) => {
+        console.log(ownerId);
+        const ownerCursor = this.ownerModel.findById(ownerId);
+        ownerCursor.exec().then((owner) => {
+          console.log(homestayId);
+          let homestays = [];
+          if (owner) {
+            homestays = [...owner.homestays, homestayId].filter(
+              (homestay) => homestay,
+            );
+          } else {
+            homestays = [];
+          }
+          ownerCursor.updateOne({ _id: ownerId }, { homestays }).exec();
+        });
+      });
+    }
+  }
 }
 
 @InputType()
-export class CreateHomestayInput {
-  @Field(() => String) name: string;
-
-  @Field(() => String, { nullable: true }) category: string;
-
-  @Field(() => String, { nullable: true }) description: string;
-
-  @Field(() => String) address: string;
-
-  @Field(() => String) place: string;
-
-  @Field(() => String, { nullable: true }) state: string;
-
-  @Field(() => String, { nullable: true }) country: string;
-
-  @Field(() => String) mobile: string;
-
-  @Field(() => String, { nullable: true }) checkinTime: string;
-
-  @Field(() => String, { nullable: true }) checkoutTime: string;
-
-  @Field(() => [String], { nullable: 'itemsAndList' }) locationTags: string[];
-
-  @Field(() => [String], { nullable: 'itemsAndList' }) tags: string[];
-
-  @Field(() => Boolean, { nullable: true }) isActive: boolean;
-
+export class CreateHomestayInput extends OmitType(
+  PartialType(Homestay, InputType),
+  ['cancellationPolicies', 'gallery', 'rooms'],
+) {
   @Field(() => [GalleryInput], { nullable: 'itemsAndList' })
   gallery?: GalleryInput[];
 
@@ -78,102 +87,12 @@ export class CreateHomestayInput {
   cancellationPolicies?: CancellationPolicyInput[];
 
   @Field(() => [RoomInput]) rooms: RoomInput[];
-
-  @Field(() => [String], { nullable: 'itemsAndList' })
-  owners: MongooseSchema.Types.ObjectId[];
-
-  @Field(() => [String], { nullable: 'itemsAndList' })
-  promotions?: MongooseSchema.Types.ObjectId[];
 }
 
 @InputType()
-export class ListHomestaysInput {
-  @Field(() => String, { nullable: true }) _id?: MongooseSchema.Types.ObjectId;
-
-  @Field(() => String, { nullable: true }) name?: string;
-
-  @Field(() => String, { nullable: true }) category?: string;
-
-  @Field(() => String, { nullable: true }) description?: string;
-
-  @Field(() => String, { nullable: true }) address?: string;
-
-  @Field(() => String, { nullable: true }) place: string;
-
-  @Field(() => String, { nullable: true }) state?: string;
-
-  @Field(() => String, { nullable: true }) country?: string;
-
-  @Field(() => String, { nullable: true }) mobile?: string;
-
-  @Field(() => String, { nullable: true }) checkinTime?: string;
-
-  @Field(() => String, { nullable: true }) checkoutTime?: string;
-
-  @Field(() => [String], { nullable: 'itemsAndList' }) locationTags?: string[];
-
-  @Field(() => [String], { nullable: 'itemsAndList' }) tags?: string[];
-
-  @Field(() => Boolean, { nullable: true }) isActive?: boolean;
-
-  @Field(() => [GalleryInput], { nullable: 'itemsAndList' })
-  gallery: GalleryInput[];
-
-  @Field(() => [CancellationPolicyInput], { nullable: 'itemsAndList' })
-  cancellationPolicies: CancellationPolicyInput[];
-
-  @Field(() => [RoomInput], { nullable: 'itemsAndList' })
-  rooms?: RoomInput[];
-
-  @Field(() => [String], { nullable: 'itemsAndList' })
-  owners?: MongooseSchema.Types.ObjectId[];
-
-  @Field(() => [String], { nullable: 'itemsAndList' })
-  promotions?: MongooseSchema.Types.ObjectId[];
-}
+export class ListHomestaysInput extends PartialType(CreateHomestayInput) {}
 
 @InputType()
-export class UpdateHomestayInput {
-  @Field(() => String) _id?: MongooseSchema.Types.ObjectId;
-
-  @Field(() => String, { nullable: true }) name?: string;
-
-  @Field(() => String, { nullable: true }) category?: string;
-
-  @Field(() => String, { nullable: true }) description?: string;
-
-  @Field(() => String, { nullable: true }) address?: string;
-
-  @Field(() => String, { nullable: true }) place: string;
-
-  @Field(() => String, { nullable: true }) state?: string;
-
-  @Field(() => String, { nullable: true }) country?: string;
-
-  @Field(() => String, { nullable: true }) mobile?: string;
-
-  @Field(() => String, { nullable: true }) checkinTime?: string;
-
-  @Field(() => String, { nullable: true }) checkoutTime?: string;
-
-  @Field(() => [String], { nullable: 'itemsAndList' }) locationTags?: string[];
-
-  @Field(() => [String], { nullable: 'itemsAndList' }) tags?: string[];
-
-  @Field(() => Boolean, { nullable: true }) isActive?: boolean;
-
-  @Field(() => [GalleryInput], { nullable: 'itemsAndList' })
-  gallery?: GalleryInput[];
-
-  @Field(() => [CancellationPolicyInput], { nullable: 'itemsAndList' })
-  cancellationPolicies?: CancellationPolicyInput[];
-
-  @Field(() => [RoomInput], { nullable: 'itemsAndList' })
-  rooms?: RoomInput[];
-
-  @Field(() => [String], { nullable: 'itemsAndList' })
-  owners?: MongooseSchema.Types.ObjectId[];
-
-  @Field(() => [String], { nullable: 'itemsAndList' })
-  promotions?: MongooseSchema.Types.ObjectId[];
+export class UpdateHomestayInput extends OmitType(ListHomestaysInput, ['_id']) {
+  @Field(() => String, { nullable: true }) _id: MongooseSchema.Types.ObjectId;
 }
