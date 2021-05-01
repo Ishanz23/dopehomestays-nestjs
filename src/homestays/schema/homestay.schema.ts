@@ -1,10 +1,21 @@
-import { Field, Float, InputType, Int, ObjectType } from '@nestjs/graphql';
+import {
+  Field,
+  Float,
+  InputType,
+  Int,
+  ObjectType,
+  registerEnumType,
+} from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
+import { HomestayCategory } from 'src/shared/enums';
 import { Owner } from '../../owners/schema/owner.schema';
 import { Promotion } from './promotion.schema';
 
-// @InputType()
+registerEnumType(HomestayCategory, {
+  name: 'HomestayCategory',
+  description: 'Describes homestay as economy, standard or premium',
+});
 @ObjectType()
 @Schema()
 export class RoomPlan {
@@ -100,9 +111,9 @@ export class Homestay {
 
   @Field(() => String) @Prop({ required: true }) name: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => HomestayCategory, { nullable: true })
   @Prop({ default: 'Economy' })
-  category: string;
+  category: HomestayCategory;
 
   @Field(() => String, { nullable: true }) @Prop() description: string;
 
@@ -116,7 +127,9 @@ export class Homestay {
   @Prop({ default: 'India' })
   country: string;
 
-  @Field(() => String) @Prop({ required: true }) mobile: string;
+  @Field(() => String) @Prop({ required: true, unique: true }) mobile: string;
+
+  @Field(() => String) @Prop({ unique: true }) email: string;
 
   @Field(() => String, { nullable: true })
   @Prop({ default: '11:00' })

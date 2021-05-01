@@ -18,6 +18,7 @@ import { OwnersModule } from './owners/owners.module';
     }),
     MongooseModule.forRoot('mongodb://localhost:27017/dopehomestays', {
       useFindAndModify: false,
+      useCreateIndex: true,
     }),
     HomestaysModule,
     TravelersModule,

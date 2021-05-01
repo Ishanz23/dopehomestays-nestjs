@@ -71,7 +71,9 @@ export class OwnerService {
 }
 
 @InputType()
-export class CreateOwnerInput extends PartialType(Owner, InputType) {}
+export class CreateOwnerInput extends PartialType(Owner, InputType) {
+  @Field(() => String) password: string;
+}
 @InputType()
 export class ListOwnerInput extends PartialType(CreateOwnerInput) {}
 

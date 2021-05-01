@@ -1,11 +1,18 @@
 import {
   Field,
   GraphQLISODateTime,
+  HideField,
   ObjectType,
   OmitType,
+  registerEnumType,
 } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
+import { MaritalStatus, Sex } from 'src/shared/enums';
+import { hideMiddleware } from '../middlewares/hide.middleware';
+
+registerEnumType(Sex, { name: 'Sex' });
+registerEnumType(MaritalStatus, { name: 'MaritalStatus' });
 
 @ObjectType()
 @Schema()
@@ -22,15 +29,21 @@ export class Owner {
   @Prop({ type: MongooseSchema.Types.Date })
   dob?: Date;
 
-  @Field(() => String) @Prop({ required: true }) sex: string;
+  @Field(() => Sex) @Prop({ required: true }) sex: Sex;
 
-  @Field(() => String) @Prop({ required: true }) mobile: string;
+  @Field(() => String) @Prop({ required: true, unique: true }) mobile: string;
 
-  @Field(() => String, { nullable: true }) @Prop() email?: string;
+  @Field(() => String, { nullable: true })
+  @Prop()
+  email?: string;
 
-  @Field(() => String, { nullable: true }) @Prop() maritalStatus?: string;
+  @Field(() => MaritalStatus, { nullable: true })
+  @Prop()
+  maritalStatus?: MaritalStatus;
 
-  @Field(() => String, { nullable: true }) @Prop() password?: string;
+  @HideField()
+  @Prop({ required: true })
+  password?: string;
 
   @Field(() => String, { nullable: true }) @Prop() address?: string;
 
@@ -38,7 +51,9 @@ export class Owner {
 
   @Field(() => String) @Prop() country: string;
 
-  @Field(() => String, { nullable: true }) @Prop() dpPath?: string;
+  @Field(() => String, { nullable: true })
+  @Prop()
+  dpPath?: string;
 
   @Field(() => [String], { nullable: 'itemsAndList' })
   @Prop({
