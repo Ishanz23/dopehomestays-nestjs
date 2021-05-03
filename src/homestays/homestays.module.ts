@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { HomestaysController } from './homestays.controller';
 import { HomestayResolver } from './homestay.resolver';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Homestay, HomestaySchema } from './schema/homestay.schema';
@@ -13,7 +12,7 @@ import { Owner, OwnerSchema } from 'src/owners/schema/owner.schema';
       { name: Owner.name, schema: OwnerSchema },
     ]),
   ],
-  controllers: [HomestaysController],
+  controllers: [],
   providers: [HomestayService, HomestayResolver],
 })
 export class HomestaysModule {}

@@ -1,6 +1,7 @@
 import {
   Field,
   Float,
+  GraphQLISODateTime,
   InputType,
   Int,
   ObjectType,
@@ -184,6 +185,14 @@ export class Homestay {
   @Field(() => [Room])
   @Prop({ type: [RoomSchema], default: [] })
   rooms: Room[];
+
+  @Field(() => GraphQLISODateTime, { nullable: true })
+  @Prop({ default: new Date().toISOString() })
+  createdAt?: string;
+
+  @Field(() => GraphQLISODateTime, { nullable: true })
+  @Prop({ default: new Date().toISOString() })
+  lastModifiedAt?: string;
 }
 
 export type HomeStayDocument = Homestay & Document;

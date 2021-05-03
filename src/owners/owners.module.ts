@@ -4,6 +4,9 @@ import { OwnerService } from './owner.service';
 import { Owner, OwnerSchema } from './schema/owner.schema';
 import { OwnerResolver } from './owner.resolver';
 import { Homestay, HomestaySchema } from 'src/homestays/schema/homestay.schema';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
@@ -20,6 +23,7 @@ import { Homestay, HomestaySchema } from 'src/homestays/schema/homestay.schema';
       },
       { name: Homestay.name, useFactory: () => HomestaySchema },
     ]),
+    AuthModule,
   ],
   providers: [OwnerService, OwnerResolver],
 })
