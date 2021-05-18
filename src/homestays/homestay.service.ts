@@ -78,8 +78,11 @@ export class HomestayService {
 @InputType()
 export class CreateHomestayInput extends OmitType(
   PartialType(Homestay, InputType),
-  ['cancellationPolicies', 'gallery', 'rooms'],
+  ['cancellationPolicies', 'coverImage', 'gallery', 'rooms'],
 ) {
+  @Field(() => GalleryInput, { nullable: true })
+  coverImage?: GalleryInput;
+
   @Field(() => [GalleryInput], { nullable: 'itemsAndList' })
   gallery?: GalleryInput[];
 

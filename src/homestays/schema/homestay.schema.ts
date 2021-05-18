@@ -166,6 +166,16 @@ export class Homestay {
   })
   gallery: Gallery[];
 
+  @Field(() => Gallery, { nullable: true })
+  @Prop({
+    type: GallerySchema,
+    default: {
+      name: '',
+      path: '',
+    },
+  })
+  coverImage: Gallery;
+
   @Field(() => [String], { nullable: 'itemsAndList' })
   @Prop({
     type: [MongooseSchema.Types.ObjectId],

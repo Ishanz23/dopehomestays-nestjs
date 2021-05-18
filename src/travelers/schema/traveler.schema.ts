@@ -35,6 +35,18 @@ export class Traveler {
   bookings: MongooseSchema.Types.ObjectId[];
 }
 
+@ObjectType()
+export class TravelerLoginResponse {
+  @Field(() => String) token: string;
+  @Field(() => String) email: string;
+  @Field(() => ID) _id: MongooseSchema.Types.ObjectId;
+}
+@ObjectType()
+export class TravelerPaswordUpdateResponse {
+  @Field(() => String) email: string;
+  @Field(() => ID) _id: MongooseSchema.Types.ObjectId;
+}
+
 export type TravelerDocument = Traveler & Document;
 
 export const TravelerSchema = SchemaFactory.createForClass(Traveler);

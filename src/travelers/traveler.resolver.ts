@@ -1,3 +1,4 @@
+import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Schema as MongooseSchema } from 'mongoose';
 import {
@@ -6,7 +7,12 @@ import {
   TravelerService,
   UpdateTravelerInput,
 } from './traveler.service';
-import { Traveler } from './schema/traveler.schema';
+import {
+  Traveler,
+  TravelerLoginResponse,
+  TravelerPaswordUpdateResponse,
+} from './schema/traveler.schema';
+import { GqlAuthGuard } from 'src/auth/guards/gql-auth.guard';
 
 @Resolver(() => Traveler)
 export class TravelerResolver {
@@ -33,6 +39,30 @@ export class TravelerResolver {
   @Mutation(() => Traveler)
   async createTraveler(@Args('payload') traveler: CreateTravelerInput) {
     return this.travelerService.create(traveler);
+  }
+
+  @Mutation(() => TravelerLoginResponse)
+  travelerLogin(
+    @Args('email') email: string,
+    @Args('password') password: string,
+  ) {
+    return this.travelerService.login(email, password);
+  }
+
+  @Mutation(() => TravelerPaswordUpdateResponse)
+  @UseGuards(GqlAuthGuard)
+  updateTravelerPassword(
+    @Args('_id', { type: () => String }) _id: MongooseSchema.Types.ObjectId,
+    @Args('currentPassword', { description: 'Provide your old password' })
+    currentPassword: string,
+    @Args('newPassword', { description: 'Provide a new password' })
+    newPassword: string,
+  ) {
+    return this.travelerService.updateTravelerPassword({
+      _id,
+      currentPassword,
+      newPassword,
+    });
   }
 
   @Mutation(() => Traveler)

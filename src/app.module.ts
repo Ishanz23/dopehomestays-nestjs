@@ -15,13 +15,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       isGlobal: true,
       cache: true,
     }),
-    GraphQLModule.forRoot({
-      autoSchemaFile: true,
-      sortSchema: true,
-      playground: true,
-      debug: false,
-      cors: true,
-    }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (cfg: ConfigService) => ({
@@ -31,6 +24,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         useFindAndModify: false,
       }),
       inject: [ConfigService],
+    }),
+    GraphQLModule.forRoot({
+      autoSchemaFile: true,
+      sortSchema: true,
+      debug: false,
+      cors: true,
     }),
     HomestaysModule,
     TravelersModule,

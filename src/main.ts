@@ -5,8 +5,13 @@ import * as helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy:
+        process.env.NODE_ENV === 'production' ? undefined : false,
+    }),
+  );
   // app.use(csurf());
-  await app.listen(3000);
+  await app.listen(3001);
 }
 bootstrap();
