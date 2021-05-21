@@ -18,7 +18,7 @@ export class Traveler {
   @Field(() => GraphQLISODateTime, { nullable: true })
   @Prop({ type: String })
   dob?: string;
-  @Field(() => String) @Prop({ required: true, unique: true }) sex: Sex;
+  @Field(() => Sex) @Prop({ required: true }) sex: Sex;
   @Field(() => String) @Prop({ required: true, unique: true }) email: string;
   @Field(() => String) @Prop({ required: true, unique: true }) mobile: string;
   @Field(() => String, { nullable: true }) @Prop() address?: string;
