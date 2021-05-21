@@ -59,6 +59,17 @@ export class TravelerService {
       : new GraphQLError('email/password is invalid');
   }
 
+  async mobileLogin(mobile: string, password: string) {
+    const traveler = await this.travelerModel.findOne({ mobile }).exec();
+    return traveler && compareSync(password, traveler.password)
+      ? {
+          token: await this.jwtService.signAsync({ id: traveler._id, mobile }),
+          mobile,
+          id: traveler._id,
+        }
+      : new GraphQLError('email/password is invalid');
+  }
+
   /**
    * Update Traveler's password in DB
    * @param param0: UpdateTravelerPassword

@@ -9,6 +9,7 @@ import {
 } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
+import { Homestay } from 'src/homestays/schema/homestay.schema';
 import { MaritalStatus, Sex } from 'src/shared/enums';
 
 registerEnumType(Sex, { name: 'Sex' });
@@ -73,7 +74,8 @@ export class Owner {
 @ObjectType()
 export class OwnerLoginResponse {
   @Field(() => String) token: string;
-  @Field(() => String) email: string;
+  @Field(() => String) email?: string;
+  @Field(() => String) mobile?: string;
   @Field(() => ID) _id: MongooseSchema.Types.ObjectId;
 }
 @ObjectType()
@@ -82,7 +84,11 @@ export class OwnerPaswordUpdateResponse {
   @Field(() => ID) _id: MongooseSchema.Types.ObjectId;
 }
 
-export class OwnerOutput extends OmitType(Owner, ['password']) {}
+@ObjectType()
+export class OwnerOutput extends OmitType(Owner, ['password', 'homestays']) {
+  @Field(() => [Homestay], { nullable: 'itemsAndList' })
+  homestays: Homestay[];
+}
 
 export type OwnerDocument = Owner & Document;
 

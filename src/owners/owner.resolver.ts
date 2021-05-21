@@ -11,6 +11,7 @@ import {
 import {
   Owner,
   OwnerLoginResponse,
+  OwnerOutput,
   OwnerPaswordUpdateResponse,
 } from './schema/owner.schema';
 
@@ -27,7 +28,7 @@ export class OwnerResolver {
     return this.ownerService.getById(_id);
   }
 
-  @Query(() => [Owner])
+  @Query(() => [OwnerOutput])
   @UseGuards(GqlAuthGuard)
   async owners(@Args('filters', { nullable: true }) filters?: ListOwnerInput) {
     return this.ownerService.list(filters);
@@ -43,6 +44,14 @@ export class OwnerResolver {
   @Mutation(() => OwnerLoginResponse)
   ownerLogin(@Args('email') email: string, @Args('password') password: string) {
     return this.ownerService.login(email, password);
+  }
+
+  @Mutation(() => OwnerLoginResponse)
+  ownerMobileLogin(
+    @Args('mobile') mobile: string,
+    @Args('password') password: string,
+  ) {
+    return this.ownerService.mobileLogin(mobile, password);
   }
 
   @Mutation(() => OwnerPaswordUpdateResponse)

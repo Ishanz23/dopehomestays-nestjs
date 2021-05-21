@@ -7,7 +7,7 @@ import {
   ListHomestaysInput,
   UpdateHomestayInput,
 } from './homestay.service';
-import { Homestay } from './schema/homestay.schema';
+import { Homestay, HomestayOutput } from './schema/homestay.schema';
 
 @Resolver(() => Homestay)
 export class HomestayResolver {
@@ -15,14 +15,14 @@ export class HomestayResolver {
 
   // Queries
 
-  @Query(() => Homestay)
+  @Query(() => HomestayOutput)
   async homestay(
     @Args('_id', { type: () => String }) _id: MongooseSchema.Types.ObjectId,
   ) {
     return this.homestayService.getById(_id);
   }
 
-  @Query(() => [Homestay])
+  @Query(() => [HomestayOutput])
   async homestays(
     @Args('filters', { nullable: true }) filters: ListHomestaysInput,
   ) {

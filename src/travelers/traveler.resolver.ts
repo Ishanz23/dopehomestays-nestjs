@@ -49,6 +49,14 @@ export class TravelerResolver {
     return this.travelerService.login(email, password);
   }
 
+  @Mutation(() => TravelerLoginResponse)
+  travelerMobileLogin(
+    @Args('mobile') mobile: string,
+    @Args('password') password: string,
+  ) {
+    return this.travelerService.mobileLogin(mobile, password);
+  }
+
   @Mutation(() => TravelerPaswordUpdateResponse)
   @UseGuards(GqlAuthGuard)
   updateTravelerPassword(

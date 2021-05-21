@@ -5,6 +5,7 @@ import {
   InputType,
   Int,
   ObjectType,
+  OmitType,
   registerEnumType,
 } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
@@ -203,6 +204,12 @@ export class Homestay {
   @Field(() => GraphQLISODateTime, { nullable: true })
   @Prop({ default: new Date().toISOString() })
   lastModifiedAt?: string;
+}
+
+@ObjectType()
+export class HomestayOutput extends OmitType(Homestay, ['owners']) {
+  @Field(() => [Owner], { nullable: 'itemsAndList' })
+  owners: Owner[];
 }
 
 export type HomeStayDocument = Homestay & Document;

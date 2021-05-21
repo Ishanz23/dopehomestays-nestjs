@@ -27,11 +27,11 @@ export class HomestayService {
   }
 
   getById(_id: MongooseSchema.Types.ObjectId) {
-    return this.homestayModel.findById(_id).exec();
+    return this.homestayModel.findById(_id).populate('owners');
   }
 
   list(filters: ListHomestaysInput) {
-    return this.homestayModel.find({ ...filters }).exec();
+    return this.homestayModel.find({ ...filters }).populate('owners');
   }
 
   async update(payload: UpdateHomestayInput) {

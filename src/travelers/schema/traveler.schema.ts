@@ -7,6 +7,7 @@ import {
 } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
+import { Sex } from 'src/shared/enums';
 @ObjectType()
 @Schema()
 export class Traveler {
@@ -14,8 +15,16 @@ export class Traveler {
   @Field(() => String) @Prop() firstName: string;
   @Field(() => String, { nullable: true }) @Prop() middleName?: string;
   @Field(() => String, { nullable: true }) @Prop() lastName?: string;
+  @Field(() => GraphQLISODateTime, { nullable: true })
+  @Prop({ type: String })
+  dob?: string;
+  @Field(() => String) @Prop({ required: true, unique: true }) sex: Sex;
   @Field(() => String) @Prop({ required: true, unique: true }) email: string;
   @Field(() => String) @Prop({ required: true, unique: true }) mobile: string;
+  @Field(() => String, { nullable: true }) @Prop() address?: string;
+  @Field(() => String) @Prop() state: string;
+  @Field(() => String) @Prop() country: string;
+  @Field(() => String, { nullable: true }) @Prop() dpPath?: string;
   @HideField() @Prop({ required: true }) password: string;
 
   @Field(() => GraphQLISODateTime, { nullable: true })

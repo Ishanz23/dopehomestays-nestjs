@@ -39,7 +39,7 @@ export class OwnerService {
   }
 
   list(filters: ListOwnerInput) {
-    return this.ownerModel.find({ ...filters }).exec();
+    return this.ownerModel.find({ ...filters }).populate('homestays');
   }
 
   async update(payload: UpdateOwnerInput) {
@@ -67,6 +67,17 @@ export class OwnerService {
           id: owner._id,
         }
       : new GraphQLError('email/password is invalid');
+  }
+
+  async mobileLogin(mobile: string, password: string) {
+    const owner = await this.ownerModel.findOne({ mobile }).exec();
+    return owner && compareSync(password, owner.password)
+      ? {
+          token: await this.jwtService.signAsync({ id: owner._id, mobile }),
+          mobile,
+          id: owner._id,
+        }
+      : new GraphQLError('mobile/password is invalid');
   }
 
   /**
