@@ -48,6 +48,7 @@ export class Traveler {
 export class TravelerLoginResponse {
   @Field(() => String) token: string;
   @Field(() => String) email: string;
+  @Field(() => String) mobile: string;
   @Field(() => ID) _id: MongooseSchema.Types.ObjectId;
 }
 @ObjectType()

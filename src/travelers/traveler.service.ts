@@ -56,7 +56,7 @@ export class TravelerService {
           email,
           id: traveler._id,
         }
-      : new GraphQLError('email/password is invalid!');
+      : new GraphQLError('Email/Password is invalid!');
   }
 
   async mobileLogin(mobile: string, password: string) {
@@ -67,7 +67,7 @@ export class TravelerService {
           mobile,
           id: traveler._id,
         }
-      : new GraphQLError('email/password is invalid');
+      : new GraphQLError('Mobile No/password is invalid');
   }
 
   /**
